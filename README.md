@@ -1,4 +1,5 @@
 # Usage
+Lookup how to install a user script for your browser alternatively:
 * Download tampermonkey/greasemonkey or whatever the userscript manager is for your browser
 * Click on the addon and select new user script
   * Firefox only: When Greasemonkey prompts you to enter information just fill in the fields with anything
