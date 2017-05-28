@@ -18,6 +18,8 @@
      // todo: fixme debug false
       this.DEBUG = true
       this.hiddenThreads = JSON.parse(window.localStorage.getItem(HIDDEN_THREADS)) || []
+      this.visibleThreads = []
+
       this.createDebugMenu()
       this.createHideButtons()
       this.batchHideThreads(document, this.hiddenThreads)
@@ -60,6 +62,7 @@
     createHideButtons () {
       let threadRoot = document.querySelector('form[name="postcontrols"]')
       let threadCollection = threadRoot.children
+      let visibleThreads = []
 
       let hideButton = document.createElement('a')
       hideButton.innerText = 'Hide'
@@ -68,6 +71,7 @@
     // 0th element is a hidden input field
       for (let i = 0; i < threadCollection.length; i++) {
         let thread = threadCollection.item(i)
+        visibleThreads.push(thread.id)
       // filter the leading hidden input element, and trailing delete elements.
       // todo: might be more clear to just !idstrcontains('thread'), and likewise for 'post'
         if (thread.tagName !== 'DIV' || !thread.classList || thread.classList.length !== 0) {
@@ -85,6 +89,8 @@
         })
         introElement.appendChild(uniqueHideButton)
       }
+
+      this.visibleThreads = visibleThreads
     }
 
     hideThread (parentNode, id, addToHiddenThreads = false) {
@@ -120,8 +126,10 @@
 
     // hide each thread in threadsToHide
     batchHideThreads (parent, threadsToHide) {
-      for (let i = 0; i < threadsToHide.length; i++) {
-        this.hideThread(parent, threadsToHide[i], false)
+      let filteredThreadsToHide = threadsToHide.filter(id => this.visibleThreads.includes(id))
+      console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
+      for (let i = 0; i < filteredThreadsToHide.length; i++) {
+        this.hideThread(parent, filteredThreadsToHide[i], false)
       }
     }
 }
