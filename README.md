@@ -2,7 +2,7 @@
 * Download tampermonkey/greasemonkey or whatever the userscript manager is for your browser
 * Click on the addon and select new user script
   * Firefox only: When Greasemonkey prompts you to enter information just fill in the fields with anything
-* Copy the contents of [otaimproved.js](~/fixme/otaimproved.js) overwriting whatever is in there.
+* Copy the contents of [otaimproved.js](https://raw.githubusercontent.com/rinfan/otaimprove/master/otaimprove.js) overwriting whatever is in there.
 * Make sure it's enabled for the current site, and it should work.
 
 
