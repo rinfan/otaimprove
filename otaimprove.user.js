@@ -3,7 +3,7 @@
 // @namespace   otaimprove
 // @description cool things for ota (and tinyboard, and probably vichan)
 // @include     https://ota-ch.com/jp/*
-// @version     0.0.2
+// @version     0.0.3
 // @grant       none
 // ==/UserScript==
 // todo: refactor
