@@ -27,7 +27,7 @@
 
       this.createDebugMenu()
       this.createHideButtons()
-      this.batchHideThreads(document, this.hiddenThreads)
+      // this.batchHideThreads(document, this.hiddenThreads)
     }
 
     createDebugMenu () {
@@ -60,8 +60,8 @@
       })
     }
 
-    // todo: this should go : make a button, is this in hidden threads? hide it, else we're done.
-    // todo narrow scope so this can be run alongside  fn threadHider(), on startup after reading hidden threads.
+    // Creates all the hide buttons for the visible threads on the page, and then using the
+    // batch hides the stored hiddenThreads array
     createHideButtons () {
       // the form HTML element containing all the thread <div>'s
       let threadRoot = document.querySelector('form[name="postcontrols"]')
@@ -100,6 +100,14 @@
       }
 
       this.visibleThreads = visibleThreads
+
+      // after it has created all the hide buttons, and we are done iterating through the threads collection
+      // it can call hideThread to modify the dome
+      let filteredThreadsToHide = this.hiddenThreads.filter(id => this.visibleThreads.includes(id))
+      console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
+      for (let i = 0; i < filteredThreadsToHide.length; i++) {
+        this.hideThread(document, filteredThreadsToHide[i], false)
+      }
     }
 
     hideThread (parentNode, id, addToHiddenThreads = false) {
@@ -133,14 +141,14 @@
       })
     }
 
-    // hide each thread in threadsToHide
-    batchHideThreads (parent, threadsToHide) {
-      let filteredThreadsToHide = threadsToHide.filter(id => this.visibleThreads.includes(id))
-      console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
-      for (let i = 0; i < filteredThreadsToHide.length; i++) {
-        this.hideThread(parent, filteredThreadsToHide[i], false)
-      }
-    }
+    // // hide each thread in threadsToHide
+    // batchHideThreads (parent, threadsToHide) {
+    //   let filteredThreadsToHide = threadsToHide.filter(id => this.visibleThreads.includes(id))
+    //   console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
+    //   for (let i = 0; i < filteredThreadsToHide.length; i++) {
+    //     this.hideThread(parent, filteredThreadsToHide[i], false)
+    //   }
+    // }
   }
 
   document.onreadystatechange = function () {
