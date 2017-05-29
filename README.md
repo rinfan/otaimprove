@@ -1,6 +1,7 @@
 # Usage
 Lookup how to install a user script for your browser, some good resources :
 * https://openuserjs.org/about/Userscript-Beginners-HOWTO
+
 After you have installed the userscript manager addon for your browser click the install button at :
 * https://openuserjs.org/scripts/rinfan/otaimprove
 
