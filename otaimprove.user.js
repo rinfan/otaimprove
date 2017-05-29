@@ -14,6 +14,8 @@
   let HIDDEN_THREADS = 'HIDDEN_THREADS'
   let HIDE_BTN_CLASS = 'hideBtnClass'
 
+  // let userSettings = {}
+
   class OtaImprove {
     constructor () {
       // todo: fixme debug false

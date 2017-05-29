@@ -1,0 +1,24 @@
+{
+  "name": "otaimprove",
+  "version": "0.0.2",
+  "description": "improves ota (tinyboard, probably vichan)",
+  "main": "otaimprove.user.js",
+  "private": true,
+  "scripts": {
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rinfan/otaimprove.git"
+  },
+  "author": "rinfan",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/rinfan/otaimprove/issues"
+  },
+  "homepage": "https://github.com/rinfan/otaimprove#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "standard": "^10.0.2"
+  }
+}
