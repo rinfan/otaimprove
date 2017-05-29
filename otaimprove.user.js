@@ -7,6 +7,7 @@
 // @grant       none
 // ==/UserScript==
 // todo: refactor
+// trivial change.
 
 ;(() => {
   let HIDDEN_THREADS = 'HIDDEN_THREADS'
