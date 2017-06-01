@@ -2,23 +2,36 @@
   "name": "otaimprove",
   "version": "0.0.2",
   "description": "improves ota (tinyboard, probably vichan)",
-  "main": "otaimprove.user.js",
+  "author": "rinfan",
+  "license": "GPL-3.0",
   "private": true,
   "scripts": {
-    "test": "standard"
+    "build": "rimraf dist/* && browserify -p [ browserify-userscript-header --file ./src/otaimprove.meta.js] -o dist/otaimprove.user.js ./src/otaimprove.user.js",
+    "test": "standard  && jasmine --config=./jasmine.json",
+    "jasmine": "jasmine --config=./jasmine.json",
+    "rimraf": "rimraf"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rinfan/otaimprove.git"
   },
-  "author": "rinfan",
-  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/rinfan/otaimprove/issues"
   },
   "homepage": "https://github.com/rinfan/otaimprove#readme",
   "devDependencies": {
+    "browserify": "^14.4.0",
+    "browserify-userscript-header": "^0.1.1",
     "eslint": "^3.19.0",
+    "jasmine": "^2.6.0",
+    "jasmine-core": "^2.6.2",
+    "rimraf": "^2.6.1",
     "standard": "^10.0.2"
+  },
+  "standard": {
+    "ignore": [
+      "**/dist/**",
+      "**/*.spec.js"
+    ]
   }
 }

@@ -7,10 +7,10 @@
 // @grant       none
 // @license     GPLv3 https://opensource.org/licenses/GPL-3.0
 // ==/UserScript==
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // todo: refactor
-// trivial change.
-
 ;(() => {
+  let userprefs = require('./userprefs.js')
   let HIDDEN_THREADS = 'HIDDEN_THREADS'
   let HIDE_BTN_CLASS = 'hideBtnClass'
 
@@ -220,15 +220,53 @@
     // }
   }
 
+  // document.onreadystatechange = function () {
+  //   if (!window.localStorage) {
+  //     window.alert('browser unsupported')
+  //   }
+  //
+  //   if (document.readyState === 'complete') {
+  //     console.log('Started script')
+  //     let otaImprove = new OtaImprove()
+  //     console.dir(otaImprove)
+  //   }
+  // }
+
+  exports.exportImportsWorking = () => console.debug('import worked. export worked : ' + JSON.stringify(userprefs.preferences))
+  exports.run = () => {
+    console.log('called the run method')
+    console.log('do some stuff')
+    console.log('whatever')
+  }
+  exports.OtaImprove = OtaImprove
+})()
+
+},{"./userprefs.js":3}],2:[function(require,module,exports){
+;(() => {
+  let otaimprove = require('./otaimprove.js')
+  otaimprove.exportImportsWorking()
+  otaimprove.run()
+
   document.onreadystatechange = function () {
     if (!window.localStorage) {
       window.alert('browser unsupported')
     }
 
     if (document.readyState === 'complete') {
-      console.log('Started script')
-      let otaImprove = new OtaImprove()
+      console.log('Started script from require')
+      let otaImprove = new otaimprove.OtaImprove()
       console.dir(otaImprove)
     }
   }
 })()
+
+},{"./otaimprove.js":1}],3:[function(require,module,exports){
+;(() => {
+  let preferences = {
+    foo: 'bar',
+    a: 'b'
+  }
+  exports.preferences = preferences
+})()
+
+},{}]},{},[2]);
