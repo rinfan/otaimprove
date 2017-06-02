@@ -17,7 +17,7 @@
   // todo: I think I keep replies stored seperately from threads.  In theory you might have lots of replies and threads hidden.
   //    If you open a thread that would waste a ton of time doing thousands of unnecessary dom searches. This probably isnt
   //    format should be [{'thread_id' : [reply_id, reply_id, reply_id]}, {'thread_id2': [reply_id, reply_id]}]
-  let HIDDEN_REPLIES = 'HIDDEN_REPLIES'
+  // let HIDDEN_REPLIES = 'HIDDEN_REPLIES'
 
   // let userSettings = {}
 
@@ -209,28 +209,7 @@
         console.log('removing hidden thread element, unhiding thread', threadHtmlElement.id)
       })
     }
-
-    // // hide each thread in threadsToHide
-    // batchHideThreads (parent, threadsToHide) {
-    //   let filteredThreadsToHide = threadsToHide.filter(id => this.visibleThreads.includes(id))
-    //   console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
-    //   for (let i = 0; i < filteredThreadsToHide.length; i++) {
-    //     this.hideThread(parent, filteredThreadsToHide[i], false)
-    //   }
-    // }
   }
-
-  // document.onreadystatechange = function () {
-  //   if (!window.localStorage) {
-  //     window.alert('browser unsupported')
-  //   }
-  //
-  //   if (document.readyState === 'complete') {
-  //     console.log('Started script')
-  //     let otaImprove = new OtaImprove()
-  //     console.dir(otaImprove)
-  //   }
-  // }
 
   exports.exportImportsWorking = () => console.debug('import worked. export worked : ' + JSON.stringify(userprefs.preferences))
   exports.run = () => {
