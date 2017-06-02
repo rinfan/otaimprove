@@ -7,7 +7,11 @@
   "private": true,
   "scripts": {
     "build": "rimraf dist/* && browserify -p [ browserify-userscript-header --file ./src/otaimprove.meta.js] -o dist/otaimprove.user.js ./src/otaimprove.user.js",
-    "test": "standard  && jasmine --config=./jasmine.json",
+    "//": "Have jasmine randomize tests, then do CI w/ karma",
+    "test": "standard  && jasmine --config=./jasmine.json && karma start",
+    "test-jasmine": "jasmine --config=./jasmine.json",
+    "test-karma": "karma start",
+    "karma": "karma start",
     "jasmine": "jasmine --config=./jasmine.json",
     "rimraf": "rimraf"
   },
@@ -25,8 +29,17 @@
     "eslint": "^3.19.0",
     "jasmine": "^2.6.0",
     "jasmine-core": "^2.6.2",
+    "karma": "^1.7.0",
+    "karma-browserify": "^5.1.1",
+    "karma-chrome-launcher": "^2.1.1",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-requirejs": "^1.1.0",
+    "require": "^2.4.20",
+    "requirejs": "^2.3.3",
     "rimraf": "^2.6.1",
-    "standard": "^10.0.2"
+    "standard": "^10.0.2",
+    "watchify": "^3.9.0"
   },
   "standard": {
     "ignore": [
