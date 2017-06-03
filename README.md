@@ -19,3 +19,4 @@ In no particular order:
 * Hide posts (left out because of performance worries)
 * See if Infinite scroll is possible (not sure how possible this is)
 * Fix back navigation requiring refresh
+* Es6 import/exports instead of node shit. Was mildly more complicated and I don't know how to minify it and use it w/ jasmine-karma so I pushed it off.
