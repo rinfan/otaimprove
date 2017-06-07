@@ -1,211 +1,212 @@
 // todo: refactor
-;(() => {
-  let userprefs = require('./userprefs.js')
-  let HIDDEN_THREADS = 'HIDDEN_THREADS'
-  let HIDE_BTN_CLASS = 'hideBtnClass'
 
-  // todo: I think I keep replies stored seperately from threads.  In theory you might have lots of replies and threads hidden.
-  //    If you open a thread that would waste a ton of time doing thousands of unnecessary dom searches. This probably isnt
-  //    format should be [{'thread_id' : [reply_id, reply_id, reply_id]}, {'thread_id2': [reply_id, reply_id]}]
-  // let HIDDEN_REPLIES = 'HIDDEN_REPLIES'
+let userprefs = require('./userprefs.js')
+let HIDDEN_THREADS = 'HIDDEN_THREADS'
+let HIDE_BTN_CLASS = 'hideBtnClass'
 
-  // let userSettings = {}
+// todo: I think I keep replies stored seperately from threads.  In theory you might have lots of replies and threads hidden.
+//    If you open a thread that would waste a ton of time doing thousands of unnecessary dom searches. This probably isnt
+//    format should be [{'thread_id' : [reply_id, reply_id, reply_id]}, {'thread_id2': [reply_id, reply_id]}]
+// let HIDDEN_REPLIES = 'HIDDEN_REPLIES'
 
-  class OtaImprove {
-    constructor () {
-      // todo: fixme debug false
-      this.DEBUG = true
-      this.hiddenThreads = JSON.parse(window.localStorage.getItem(HIDDEN_THREADS)) || []
-      // kill potential duplicate ids.
-      this.hiddenThreads = Array.from(new Set(this.hiddenThreads))
-      this.hiddenReplies = []
-      this.visibleThreads = []
-      this.visibleReplies = []
+// let userSettings = {}
 
-      this.createDebugMenu()
-      this.createHideButtons()
-      // this.batchHideThreads(document, this.hiddenThreads)
+class OtaImprove {
+  constructor () {
+    // todo: fixme debug false
+    this.DEBUG = true
+    this.hiddenThreads = JSON.parse(window.localStorage.getItem(HIDDEN_THREADS)) || []
+    // kill potential duplicate ids.
+    this.hiddenThreads = Array.from(new Set(this.hiddenThreads))
+    this.hiddenReplies = []
+    this.visibleThreads = []
+    this.visibleReplies = []
+
+    this.createDebugMenu()
+    this.createHideButtons()
+    // this.batchHideThreads(document, this.hiddenThreads)
+  }
+
+  createDebugMenu () {
+    if (!this.DEBUG) {
+      return
     }
 
-    createDebugMenu () {
-      if (!this.DEBUG) { return }
+    let debugLink = document.createElement('button')
+    debugLink.style = 'float: right;'
+    debugLink.innerText = 'Debug OtaImprove'
+    document.querySelector('.boardlist').appendChild(debugLink)
 
-      let debugLink = document.createElement('button')
-      debugLink.style = 'float: right;'
-      debugLink.innerText = 'Debug OtaImprove'
-      document.querySelector('.boardlist').appendChild(debugLink)
+    let debugElement = document.createElement('div')
+    debugElement.style = 'display:none'
+    // simple data dumps that don't need a listener should go here.
+    debugElement.innerHTML = `<div>${JSON.stringify(this)}</div><br>`
 
-      let debugElement = document.createElement('div')
-      debugElement.style = 'display:none'
-      // simple data dumps that don't need a listener should go here.
+    let localStorageClear = document.createElement('button')
+    localStorageClear.innerText = 'Clear hidden threads'
+
+    document.querySelector('.boardlist').appendChild(debugElement)
+    debugElement.appendChild(localStorageClear)
+
+    // Event handlers.
+    debugLink.addEventListener('click', () => {
+      console.debug('debug menu open')
+      debugElement.style = 'display: block; background: white; color: black'
+      // update the data dump
       debugElement.innerHTML = `<div>${JSON.stringify(this)}</div><br>`
+    })
+    localStorageClear.addEventListener('click', () => {
+      console.debug('before', this.hiddenThreads)
+      window.localStorage.setItem(HIDDEN_THREADS, '[]')
+      console.debug('after', window.localStorage.getItem(HIDDEN_THREADS))
+    })
+  }
 
-      let localStorageClear = document.createElement('button')
-      localStorageClear.innerText = 'Clear hidden threads'
+  // Creates all the hide buttons for the visible threads on the page, and then using the
+  // batch hides the stored hiddenThreads array
+  createHideButtons () {
+    // the form HTML element containing all the thread <div>'s
+    let threadRoot = document.querySelector('form[name="postcontrols"]')
+    let threadCollection = threadRoot.children
 
-      document.querySelector('.boardlist').appendChild(debugElement)
-      debugElement.appendChild(localStorageClear)
+    // todo: unify under post view eg visiblePosts includes threads and replies.
+    let visibleThreads = []
+    let visibleReplies = []
 
-      // Event handlers.
-      debugLink.addEventListener('click', () => {
-        console.debug('debug menu open')
-        debugElement.style = 'display: block; background: white; color: black'
-        // update the data dump
-        debugElement.innerHTML = `<div>${JSON.stringify(this)}</div><br>`
+    let hideButton = document.createElement('a')
+    hideButton.innerText = 'Hide'
+    // Unfortunately since some stylesheets(Miku at least) use a a:link pseudo-class to style buttons it can't
+    // always look like [Reply] link button.  don't set an href since it rockets you to the top of the page.
+    hideButton.className = HIDE_BTN_CLASS
+
+    for (let i = 0; i < threadCollection.length; i++) {
+      let thread = threadCollection.item(i)
+      // filter the leading hidden input element, and trailing delete elements.
+      // thread elements have an id of the form 'thread_#####'
+      if (!thread.id || !thread.id.includes('thread')) {
+        // its not a thread element, skip it
+        continue
+      }
+
+      visibleThreads.push(thread.id)
+
+      // intro element contains the checkbox, name, date string, post number, etc.
+      let introElement = thread.querySelector('.intro')
+      let uniqueHideButton = hideButton.cloneNode(true)
+      uniqueHideButton.addEventListener('click', () => {
+        let threadId = thread.id
+        console.log('clicked', threadId)
+        // update the array of hiddenThreads, update the localStore, and then hide the thread.
+        this.hiddenThreads.push(threadId)
+        window.localStorage.setItem(HIDDEN_THREADS, JSON.stringify(this.hiddenThreads))
+        this.hideThread(document, threadId, false, true)
       })
-      localStorageClear.addEventListener('click', () => {
-        console.debug('before', this.hiddenThreads)
-        window.localStorage.setItem(HIDDEN_THREADS, '[]')
-        console.debug('after', window.localStorage.getItem(HIDDEN_THREADS))
-      })
-    }
 
-    // Creates all the hide buttons for the visible threads on the page, and then using the
-    // batch hides the stored hiddenThreads array
-    createHideButtons () {
-      // the form HTML element containing all the thread <div>'s
-      let threadRoot = document.querySelector('form[name="postcontrols"]')
-      let threadCollection = threadRoot.children
+      introElement.appendChild(uniqueHideButton)
 
-      // todo: unify under post view eg visiblePosts includes threads and replies.
-      let visibleThreads = []
-      let visibleReplies = []
-
-      let hideButton = document.createElement('a')
-      hideButton.innerText = 'Hide'
-      // Unfortunately since some stylesheets(Miku at least) use a a:link pseudo-class to style buttons it can't
-      // always look like [Reply] link button.  don't set an href since it rockets you to the top of the page.
-      hideButton.className = HIDE_BTN_CLASS
-
-      for (let i = 0; i < threadCollection.length; i++) {
-        let thread = threadCollection.item(i)
-        // filter the leading hidden input element, and trailing delete elements.
-        // thread elements have an id of the form 'thread_#####'
-        if (!thread.id || !thread.id.includes('thread')) {
-           // its not a thread element, skip it
+      // process the threads child replies.
+      let threadChildren = thread.children
+      for (let i = 0; i < threadChildren.length; i++) {
+        let reply = threadChildren.item(i)
+        if (!reply.id || !reply.id.includes('reply')) {
           continue
         }
 
-        visibleThreads.push(thread.id)
+        visibleReplies.push(reply.id)
 
-        // intro element contains the checkbox, name, date string, post number, etc.
-        let introElement = thread.querySelector('.intro')
-        let uniqueHideButton = hideButton.cloneNode(true)
-        uniqueHideButton.addEventListener('click', () => {
-          let threadId = thread.id
-          console.log('clicked', threadId)
-          // update the array of hiddenThreads, update the localStore, and then hide the thread.
-          this.hiddenThreads.push(threadId)
-          window.localStorage.setItem(HIDDEN_THREADS, JSON.stringify(this.hiddenThreads))
-          this.hideThread(document, threadId, false, true)
+        let replyIntroElement = reply.querySelector('.intro')
+        let replyUniqueHideBtn = hideButton.cloneNode(true)
+        replyUniqueHideBtn.addEventListener('click', () => {
+          let replyId = reply.id
+          console.log('clicked hide', replyId)
+          this.hiddenReplies.push(replyId)
+          this.hideThread(document, replyId, false, false)
         })
 
-        introElement.appendChild(uniqueHideButton)
-
-        // process the threads child replies.
-        let threadChildren = thread.children
-        for (let i = 0; i < threadChildren.length; i++) {
-          let reply = threadChildren.item(i)
-          if (!reply.id || !reply.id.includes('reply')) {
-            continue
-          }
-
-          visibleReplies.push(reply.id)
-
-          let replyIntroElement = reply.querySelector('.intro')
-          let replyUniqueHideBtn = hideButton.cloneNode(true)
-          replyUniqueHideBtn.addEventListener('click', () => {
-            let replyId = reply.id
-            console.log('clicked hide', replyId)
-            this.hiddenReplies.push(replyId)
-            this.hideThread(document, replyId, false, false)
-          })
-
-          replyIntroElement.appendChild(replyUniqueHideBtn)
-        }
-      }
-
-      this.visibleThreads = visibleThreads
-      this.visibleReplies = visibleReplies
-
-      // after it has created all the hide buttons, and we are done iterating through the threads collection
-      // it can call hideThread to modify the dome
-      let filteredThreadsToHide = this.hiddenThreads.filter(id => this.visibleThreads.includes(id))
-      console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
-      for (let i = 0; i < filteredThreadsToHide.length; i++) {
-        this.hideThread(document, filteredThreadsToHide[i], false)
+        replyIntroElement.appendChild(replyUniqueHideBtn)
       }
     }
 
-    hideThread (parentNode, id, addToHiddenThreads = false, isThread = true) {
-      if (addToHiddenThreads) {
-        this.hiddenThreads.push(id)
-      }
+    this.visibleThreads = visibleThreads
+    this.visibleReplies = visibleReplies
 
-      // handle constructing values differently.
-      if (!isThread) {
-        let replyHtmlElement = document.getElementById(id)
-        let replyParent = replyHtmlElement.parentElement
-        let hiddenReplyElement = document.createElement('div')
-        let introElement = replyHtmlElement.querySelector('.intro')
-        let hiddenReplyElementIntroElement = introElement.cloneNode(true)
+    // after it has created all the hide buttons, and we are done iterating through the threads collection
+    // it can call hideThread to modify the dome
+    let filteredThreadsToHide = this.hiddenThreads.filter(id => this.visibleThreads.includes(id))
+    console.log('performing batch hide', this.visibleThreads, filteredThreadsToHide)
+    for (let i = 0; i < filteredThreadsToHide.length; i++) {
+      this.hideThread(document, filteredThreadsToHide[i], false)
+    }
+  }
 
-        let oldHideButtonTakenFromThePost = hiddenReplyElementIntroElement.querySelector('.' + HIDE_BTN_CLASS)
-        let newHideButton = oldHideButtonTakenFromThePost.cloneNode(true)
-        hiddenReplyElementIntroElement.replaceChild(newHideButton, oldHideButtonTakenFromThePost)
+  hideThread (parentNode, id, addToHiddenThreads = false, isThread = true) {
+    if (addToHiddenThreads) {
+      this.hiddenThreads.push(id)
+    }
 
-        // this part and listener handling is the only thing that should matter.
-        replyHtmlElement.style = 'display:none;'
-        hiddenReplyElement.className = 'post reply'
-        hiddenReplyElement.appendChild(hiddenReplyElementIntroElement)
-        // hiddenReplyElement.appendChild(document.createElement('br'))
+    // handle constructing values differently.
+    if (!isThread) {
+      let replyHtmlElement = document.getElementById(id)
+      let replyParent = replyHtmlElement.parentElement
+      let hiddenReplyElement = document.createElement('div')
+      let introElement = replyHtmlElement.querySelector('.intro')
+      let hiddenReplyElementIntroElement = introElement.cloneNode(true)
 
-        replyParent.insertBefore(hiddenReplyElement, replyHtmlElement)
-
-        newHideButton.addEventListener('click', () => {
-          replyHtmlElement.style = 'display: inline-block'
-          replyParent.removeChild(hiddenReplyElement)
-          // todo: modify global hiddenReplies
-          let index = this.hiddenReplies.indexOf(id)
-          this.hiddenReplies.splice(index, 1)
-          // window.localStorage.setItem(HIDDEN_THREADS, JSON.stringify(this.hiddenThreads))
-          console.log('removing hidden reply element, unhiding reply', replyHtmlElement.id)
-        })
-        return
-      }
-
-      let threadHtmlElement = document.getElementById(id)
-      let threadParent = threadHtmlElement.parentElement
-      let hiddenThreadElement = document.createElement('div')
-      let introElement = threadHtmlElement.querySelector('.intro')
-      let hiddenThreadElementIntroElement = introElement.cloneNode(true)
-
-      let oldHideButtonTakenFromThePost = hiddenThreadElementIntroElement.querySelector('.' + HIDE_BTN_CLASS)
+      let oldHideButtonTakenFromThePost = hiddenReplyElementIntroElement.querySelector('.' + HIDE_BTN_CLASS)
       let newHideButton = oldHideButtonTakenFromThePost.cloneNode(true)
-      hiddenThreadElementIntroElement.replaceChild(newHideButton, oldHideButtonTakenFromThePost)
+      hiddenReplyElementIntroElement.replaceChild(newHideButton, oldHideButtonTakenFromThePost)
 
-      threadHtmlElement.style = 'display:none;'
-      hiddenThreadElement.appendChild(hiddenThreadElementIntroElement)
-      hiddenThreadElement.appendChild(document.createElement('hr'))
+      // this part and listener handling is the only thing that should matter.
+      replyHtmlElement.style = 'display:none;'
+      hiddenReplyElement.className = 'post reply'
+      hiddenReplyElement.appendChild(hiddenReplyElementIntroElement)
+      // hiddenReplyElement.appendChild(document.createElement('br'))
 
-      threadParent.insertBefore(hiddenThreadElement, threadHtmlElement)
+      replyParent.insertBefore(hiddenReplyElement, replyHtmlElement)
 
       newHideButton.addEventListener('click', () => {
-        threadHtmlElement.style = 'display: block'
-        threadParent.removeChild(hiddenThreadElement)
-        let index = this.hiddenThreads.indexOf(id)
-        this.hiddenThreads.splice(index, 1)
-        window.localStorage.setItem(HIDDEN_THREADS, JSON.stringify(this.hiddenThreads))
-        console.log('removing hidden thread element, unhiding thread', threadHtmlElement.id)
+        replyHtmlElement.style = 'display: inline-block'
+        replyParent.removeChild(hiddenReplyElement)
+        // todo: modify global hiddenReplies
+        let index = this.hiddenReplies.indexOf(id)
+        this.hiddenReplies.splice(index, 1)
+        // window.localStorage.setItem(HIDDEN_THREADS, JSON.stringify(this.hiddenThreads))
+        console.log('removing hidden reply element, unhiding reply', replyHtmlElement.id)
       })
+      return
     }
-  }
 
-  exports.exportImportsWorking = () => console.debug('import worked. export worked : ' + JSON.stringify(userprefs.preferences))
-  exports.run = () => {
-    console.log('called the run method')
-    console.log('do some stuff')
-    console.log('whatever')
+    let threadHtmlElement = document.getElementById(id)
+    let threadParent = threadHtmlElement.parentElement
+    let hiddenThreadElement = document.createElement('div')
+    let introElement = threadHtmlElement.querySelector('.intro')
+    let hiddenThreadElementIntroElement = introElement.cloneNode(true)
+
+    let oldHideButtonTakenFromThePost = hiddenThreadElementIntroElement.querySelector('.' + HIDE_BTN_CLASS)
+    let newHideButton = oldHideButtonTakenFromThePost.cloneNode(true)
+    hiddenThreadElementIntroElement.replaceChild(newHideButton, oldHideButtonTakenFromThePost)
+
+    threadHtmlElement.style = 'display:none;'
+    hiddenThreadElement.appendChild(hiddenThreadElementIntroElement)
+    hiddenThreadElement.appendChild(document.createElement('hr'))
+
+    threadParent.insertBefore(hiddenThreadElement, threadHtmlElement)
+
+    newHideButton.addEventListener('click', () => {
+      threadHtmlElement.style = 'display: block'
+      threadParent.removeChild(hiddenThreadElement)
+      let index = this.hiddenThreads.indexOf(id)
+      this.hiddenThreads.splice(index, 1)
+      window.localStorage.setItem(HIDDEN_THREADS, JSON.stringify(this.hiddenThreads))
+      console.log('removing hidden thread element, unhiding thread', threadHtmlElement.id)
+    })
   }
-  exports.OtaImprove = OtaImprove
-})()
+}
+
+exports.exportImportsWorking = () => console.debug('import worked. export worked : ' + JSON.stringify(userprefs.preferences))
+exports.run = () => {
+  console.log('called the run method')
+  console.log('do some stuff')
+  console.log('whatever')
+}
+exports.OtaImprove = OtaImprove
