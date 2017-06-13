@@ -1,6 +1,6 @@
 ;(() => {
   let preferences = {
-    foo: 'bar',
+    whatever: 'something',
     a: 'b'
   }
   exports.preferences = preferences
