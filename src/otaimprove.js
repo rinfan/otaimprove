@@ -3,6 +3,7 @@
 let userprefs = require('./userprefs.js')
 const HIDDEN_THREADS = 'HIDDEN_THREADS'
 const HIDE_BTN_CLASS = 'hideBtnClass'
+const INFINITE_SCROLL_ID = 'rfoi-infinite-scroll-id'
 
 // todo: I think I keep replies stored seperately from threads.  In theory you might have lots of replies and threads hidden.
 //    If you open a thread that would waste a ton of time doing thousands of unnecessary dom
@@ -50,7 +51,7 @@ class OtaImprove {
   }
 
   constructor () {
-    // todo: remove at some point.
+    // todo: remove migration at some point.
     // todo: activate before release
     // this.migrate002To003()
     // todo: fixme debug false
@@ -60,19 +61,17 @@ class OtaImprove {
     this.hiddenThreads = Array.from(new Set(this.hiddenThreads))
     this.hiddenReplies = JSON.parse(window.localStorage.getItem(GET_HIDDEN_REPLIES())) || []
     this.hiddenReplies = Array.from(new Set(this.hiddenReplies))
-    this.visibleThreads = []
-    this.visibleReplies = []
 
-    // functions to be called whenever a hide performs.
-    // todo
-    this.hideActions = []
+    // todo: figure out a name for the "unhidden/hidden introbar htmlelement"
+    // todo: input array of htmlelements to be displayed on the hidden introbar
+    // todo: input array of htmlelements to be displayed on the displayed introbar
+    // todo functions to be called whenever a hide performs.
+    this.hideListeners = []
+    // todo functions to be called whenever an unhide performs.
+    this.unhideListeners = []
 
     this.createDebugMenu()
     this.performDomEdits()
-
-    // this.createHideButtons()
-
-    // this.batchHideThreads(document, this.hiddenThreads)
   }
 
   performDomEdits () {
@@ -84,11 +83,14 @@ class OtaImprove {
                             Array.prototype.slice.call(element.children))
     replyCollection = flatten(replyCollection)
                       .filter(element => element.id && element.id.includes('reply_'))
-    // let visibleThreads = []
-    // let visibleReplies = []
+
     let visiblePosts = threadCollection.concat(replyCollection)
 
+    // Create the hide buttons & hide the users hidden posts
     this.hideThreadsRENAME(visiblePosts, this.hiddenThreads, this.hiddenReplies)
+
+    // Create infinite scroll elements
+    this.setupInfiniteScroll()
   }
 
   // visiblePosts: array html elements,
@@ -298,6 +300,57 @@ class OtaImprove {
       window.localStorage.setItem(GET_HIDDEN_REPLIES(), '[]')
       console.debug('after', window.localStorage)
     })
+  }
+
+  setupInfiniteScroll () {
+    INFINITE_SCROLL_ID
+    let infiniteScrollLoader = document.createElement('div')
+    infiniteScrollLoader.id = INFINITE_SCROLL_ID
+    infiniteScrollLoader.style = 'height: 50px; width: 50px; background: black; color:white'
+    infiniteScrollLoader.innerHTML = 'Loader more threads...'
+
+    this.appendAfterLastThread(infiniteScrollLoader)
+
+    infiniteScrollLoader.addEventListener('click', () => this.infiniteScrollListener(this.getCurrentPage()))
+  }
+
+  appendAfterLastThread (htmlElement) {
+    let threadContainer = document.querySelector('[name="postcontrols"]')
+    threadContainer.insertBefore(htmlElement, threadContainer.childNodes[threadContainer.length - 2])
+  }
+
+  getCurrentPage () {
+    let pathnames = window.location.pathname.split('/')
+    let pagename = pathnames[pathnames.length - 1]
+    if (pagename.includes('index')) {
+      // page 0
+      return 0
+    } else {
+      let page = /\d*/g.exec(pagename)
+      let pagenum = parseInt(page, 10)
+      if (!pagenum) {
+        console.error('failed to get current page')
+      }
+      return pagenum
+    }
+  }
+
+  infiniteScrollListener (currentPage) {
+    // todo need to use window.location.pathname
+    console.log('infinite scroll time!')
+    infinteScrollListener
+
+    // uses an xhr to get the next threads and append them.
+    let xhr = new XMLHttpRequest()
+    xhr.open('GET', nextPageUrl)
+    xhr.responseType = 'document'
+
+    xhr.addEventListener('load', function () {
+      let response = this.response
+      let nextPageThreadContainer = response.querySelector('[name="postcontrols"]')
+    })
+
+    xhr.send()
   }
 }
 
